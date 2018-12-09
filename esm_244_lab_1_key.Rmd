@@ -17,5 +17,123 @@ knitr::opts_chunk$set(echo = TRUE)
 - Intro to sf (simple features)
 - Intro to Shiny apps (ui + server, Old Faithful example)
 
+**Packages**:
+
+- tidyverse
+- sf
+
+```{r packages, message = FALSE, warning = FALSE}
+
+library(tidyverse)
+library(sf)
+library(leaflet)
+library(tmap)
+
+```
+
 ####1. Review
+
+
+
+
+
+####2. California counties (spatial data)
+
+Data: CA.gov California Open Data Portal: <https://data.ca.gov/dataset/ca-geographic-boundaries>
+
+File types (see more at <https://www.census.gov/geo/maps-data/data/tiger-line.html>):
+
+- Feature geometry: .shp
+- Index of feature geometry: .shx
+- Character encoding: .cpg
+- Attribute information: .dbf
+- Coodinate system information: .prj
+- International Organization for Standardization (ISO 191) metadata: .shp.iso.xml
+- ISO 191 (entity and attribute) metatdata: .shp.ea.iso.xml
+
+**Attribute variables we'll use**:
+
+a. Use st_read() in the *sf* package to read in shape file data. You'll need to include the directory (just "." if in the project working directory) and the file prefix argument 'layer = "prefix_here"'.
+
+```{r, echo = TRUE, results = "hide"}
+
+ca_counties <- st_read(dsn = ".", layer = "CA_Counties_TIGER2016")
+
+```
+
+A **really** cool thing about the *sf* package is that geometries are sticky - that means that we basically get to work with spatial attributes like a normal tibble/data frame, but the geometries (spatial information) stick to it. 
+
+b. Select only the ALAND attribute + County name. Notice that geometries stick. Use plot() to see counties. 
+
+```{r geometries_stick}
+
+ca_land <- ca_counties %>% 
+  select(NAME, ALAND)
+
+# plot(ca_land)
+
+```
+
+c. Join the spatial data to income data (ca_pop_inc.csv)
+
+```{r, warning = FALSE, message = FALSE}
+
+# Read pop/income data, then make sure county names column matches
+ca_pop_inc <- read_csv("ca_pop_inc.csv") %>% 
+  rename(NAME = COUNTY)
+
+# Join the two: 
+ca_df <- full_join(ca_land, ca_pop_inc) %>% 
+  select(NAME, MedFamilyIncome)
+```
+
+d. Use geom_sf to create a map using ggplot
+
+```{r map}
+# Make a map: 
+ca_income <- ggplot(ca_df) +
+  geom_sf(aes(fill = MedFamilyIncome), color = "white", size = 0.2) +
+  scale_fill_gradientn(colors = c("blue","mediumorchid1","orange")) +
+  theme_minimal()
+
+ca_income
+
+```
+
+e. ...or using leaflet
+
+```{r leaflet_error}
+
+leaflet(ca_df) %>% 
+  addPolygons() 
+
+# Oh no, the projection is wrong! We need it to match the projection that leaflet uses (WGS84)
+
+ca_df_transform <- st_transform(ca_df, crs = 4326)
+
+# Now try that again...
+
+leaflet(ca_df_transform) %>% 
+  addTiles() %>% # Adds bg
+  addPolygons(weight = 1.0,
+              opacity = 1.0,
+              color = "white",
+              fillOpacity = 0.5,
+              fillColor = ~colorQuantile("YlOrRd", MedFamilyIncome)(MedFamilyIncome)
+              ) # Adds polygons
+
+```
+
+f. ...or using tmap!
+
+```{r}
+tmap_mode("view")
+## tmap mode set to interactive viewing
+# if (Sys.getenv("USER") != "CRAN")
+
+tm_shape(ca_df_transform) + tm_fill("MedFamilyIncome", alpha = 0.5)
+```
+
+
+
 
