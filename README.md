@@ -1,2 +1,17 @@
-# esm-244-lab-1
-Wrangling review, a map with sf, and an introduction to Shiny apps
+# ESM 244 Lab 1 (Winter 2019)
+
+# Topics: 
+
+- ESM 206 review (read, attach, wrangle, visualize)
+- A map (meet package sf)
+- An introduction to Shiny apps
+
+# Data: 
+
+
+
+
+
+
+
+
