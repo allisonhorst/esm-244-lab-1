@@ -31,13 +31,74 @@ library(tmap)
 
 ```
 
-####1. Review
+####1. Review: read, explore, wrangle, visualize
+
+Pinot noir reviews scraped from Wine Enthusiast (scraped, compiled and cleaned for Kaggle by user zackthoutt at <https://www.kaggle.com/zynicide/wine-reviews>).
+
+a. Read in the data
+
+```{r wine_data, message = FALSE}
+
+wine <- read_csv("wine_data.csv")
+
+```
+
+b. Basic wrangling with piping (%>%) refresher
+
+```{r wine_wrangle}
+
+wine_new <- wine %>% 
+  select(country, province, winery, region_1, points, price) %>% 
+  rename(state = province) %>% 
+  filter(state == "California" | state == "Oregon" | state == "Washington") %>% 
+  mutate(ppd = round(points/price,2)) %>% # points per dollar!
+  arrange(-ppd) 
+
+```
+
+c. Summary stats by group using group_by and summarize()
+
+```{r wine_summary}
+
+wine_summary <- wine_new %>% 
+  group_by(state) %>% 
+  summarize(
+    mean_ppp = mean(ppd, na.rm = TRUE),
+    median_ppp = median(ppd, na.rm = TRUE),
+    min = min(ppd, na.rm = TRUE),
+    count = length(state)
+  )
+
+wine_summary
+
+```
 
 
+d. A few gg graphics
 
+```{r, warning = FALSE}
 
+wine_hists <- ggplot(wine_new, aes(x = ppd)) +
+  geom_histogram(aes(fill = state), alpha = 0.7) +
+  scale_fill_manual(values = c("royalblue", "mediumorchid1","orange")) +
+  facet_wrap(~state, scales = "free")
 
-####2. California counties (spatial data)
+wine_hists
+
+wine_points <- ggplot(wine_new, aes(x = price, y = points)) +
+  geom_point(aes(color = state), alpha = 0.1) +
+  geom_smooth(color = "black", method = "lm", size = 0.4, se = FALSE) +
+  scale_color_manual(values = c("royalblue","mediumorchid1","orange")) +
+  theme_light() +
+  labs(x = "Price", y = "Points") +
+  theme(legend.position = "NA") +
+  facet_wrap(~state)
+
+wine_points
+
+```
+
+###2. California counties (spatial data)
 
 Data: CA.gov California Open Data Portal: <https://data.ca.gov/dataset/ca-geographic-boundaries>
 
@@ -104,8 +165,10 @@ e. ...or using leaflet
 
 ```{r leaflet_error}
 
-leaflet(ca_df) %>% 
-  addPolygons() 
+# Show that this doesn't work:
+
+#leaflet(ca_df) %>% 
+#  addPolygons() 
 
 # Oh no, the projection is wrong! We need it to match the projection that leaflet uses (WGS84)
 
