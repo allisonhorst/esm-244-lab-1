@@ -197,6 +197,10 @@ tmap_mode("view")
 tm_shape(ca_df_transform) + tm_fill("MedFamilyIncome", alpha = 0.5)
 ```
 
+###3. A Shiny app overview
 
+a. Create a new Shiny app (single file containing ui and server). 
+
+b. Notice that an example (Old Faithful Geyser histogram) appears. Select 'Run App' to run it - then play with the widget. 
 
 
