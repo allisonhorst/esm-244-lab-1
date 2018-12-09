@@ -1,0 +1,21 @@
+---
+title: "ESM 244 Lab 1"
+author: "Allison Horst"
+date: "December 8, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+###ESM 244 Lab 1: 
+
+**Objectives**:
+
+- ESM 206 basics review (github > project > working directories > rmarkdown > read > wrangle > visualize > github)
+- Intro to sf (simple features)
+- Intro to Shiny apps (ui + server, Old Faithful example)
+
+####1. Review
+
