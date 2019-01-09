@@ -6,9 +6,12 @@
 - A map (meet package sf)
 - An introduction to Shiny apps
 
-# Data: 
+# Required packages
 
-
+- sf
+- tidyverse
+- tmap
+- leaflet
 
 
 
